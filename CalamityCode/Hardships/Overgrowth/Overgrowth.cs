@@ -26,10 +26,17 @@ public sealed class PollenSachet : HardshipRelic
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips => [HoverTipFactory.FromPower<WeakPower>()];
 
-    protected override Task AtCombatStart(PlayerChoiceContext choiceContext, ICombatState combatState)
+    protected override async Task AtCombatStart(PlayerChoiceContext choiceContext, ICombatState combatState)
     {
         Flash();
-        return PowerCmd.Apply<WeakPower>(choiceContext, Owner.Creature, DynamicVars.Weak.BaseValue, Owner.Creature, null);
+        WeakPower? weak = await PowerCmd.Apply<WeakPower>(choiceContext, Owner.Creature, DynamicVars.Weak.BaseValue, Owner.Creature, null);
+        // Vanilla makes every debuff applied to a player skip its next tick, because enemies apply them during their own
+        // turn and the tick at the end of that turn would eat them instantly. Applied at the start of the player's turn,
+        // that skip would make 1 Weak last two turns, so tick normally: Weak 1 covers turn 1 only.
+        if (weak != null)
+        {
+            weak.SkipNextDurationTick = false;
+        }
     }
 }
 

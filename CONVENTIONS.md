@@ -36,6 +36,9 @@ Rules for designing and coding Calamity content. When something here conflicts w
 - **Multiplayer determinism.** Anything that affects game state uses the run's seeded RNG or a seed derived from shared
   state (seed + act + floor), never `Random`. Only UI presentation (hand fog, banners, badges) may be local-only.
   Player choices go through `PlayerChoiceSynchronizer` the way vanilla does (see the Pact and Mend).
+- **Timed debuffs on players skip their first tick.** Vanilla sets `SkipNextDurationTick` on every debuff applied to a
+  player (enemies apply them in their own turn). A debuff a hardship applies at the start of the player's turn would
+  last a turn longer than its number says; clear the flag after applying when the number should mean "this turn".
 - **Prefer hooks over Harmony.** Override a model hook when one exists. When a Harmony patch is needed, say in its
   comment *why* no hook covers it, and patch the narrowest method.
 - **Text lives in `Calamity/localization/eng/*.json`**, keyed `CALAMITY-<SNAKE_NAME>`. The build fails if a model has
