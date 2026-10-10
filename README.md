@@ -25,11 +25,9 @@ Requires Docker only (the .NET 9 SDK and the art tools run in containers).
 ./package.ps1           # build/release/Calamity-<version>.zip for friends + build/workshop/Calamity for the Workshop
 ```
 
-- **Zip:** friends extract it and double-click `Install-Calamity.bat`. It installs the mods and a ready-to-play
-  modded profile (your most recent modded `progress.save`, with everything unlocked including A11; no run history or
-  settings, and a fresh `unique_id`), backing up anything it replaces. `tools/share/INSTALL.md` (inside the zip)
-  covers the Steam Cloud step and how to use their own progress instead. `./package.ps1 -NoProfile` leaves the
-  profile out.
+- **Zip:** friends extract it and double-click `Install-Calamity.bat`, which copies the mods into their game folder.
+  `tools/share/INSTALL.md` (inside the zip) has them run `unlock all` in the dev console to unlock everything up to
+  A11 on their fresh modded profile.
 - **Steam Workshop:** use Mega Crit's [sts2-mod-uploader](https://github.com/megacrit/sts2-mod-uploader):
   `ModUploader.exe upload -w build\workshop\Calamity`. `workshop.json` defaults to `friends_only`; add BaseLib's
   Workshop ID to `dependencies` first. Keep the `mod_id.txt` it writes so later uploads update the same item.

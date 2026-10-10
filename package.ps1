@@ -1,18 +1,14 @@
 <#
 .SYNOPSIS
   Packages the last build for sharing:
-    * build/release/Calamity-<version>.zip  - drop-in zip for friends (mods/Calamity + mods/BaseLib + INSTALL.md)
+    * build/release/Calamity-<version>.zip  - drop-in zip for testers (mods + one-click installer + INSTALL.md)
     * build/workshop/Calamity               - a workspace for Mega Crit's ModUploader (Steam Workshop)
 
   Run ./build.ps1 first.
 
-  The zip also carries a ready-made playtest profile (see below) and a one-click installer for testers.
-
 .EXAMPLE
   ./build.ps1 -NoDeploy; ./package.ps1
-  ./package.ps1 -NoProfile   # mods + installer only
 #>
-param([switch]$NoProfile)
 $ErrorActionPreference = "Stop"
 $root = $PSScriptRoot
 $staged = Join-Path $root "build\mods"
@@ -21,7 +17,7 @@ foreach ($required in "Calamity\Calamity.dll", "Calamity\Calamity.json", "Calami
 }
 $version = (Get-Content (Join-Path $staged "Calamity\Calamity.json") -Raw | ConvertFrom-Json).version
 
-# --- Zip for friends -------------------------------------------------------------------------------------------
+# --- Zip for testers -------------------------------------------------------------------------------------------
 $release = Join-Path $root "build\release"
 $zipRoot = Join-Path $release "Calamity-$version"
 if (Test-Path $zipRoot) { Remove-Item -Recurse -Force $zipRoot }
@@ -34,25 +30,6 @@ foreach ($mod in "Calamity", "BaseLib") {
 }
 foreach ($file in "INSTALL.md", "install.ps1", "Install-Calamity.bat") {
     Copy-Item (Join-Path $root "tools\share\$file") $zipRoot
-}
-
-# Playtest profile: your most recently used modded progress (unlocks, A11), so testers can play immediately.
-# Only progress.save ships: no run history, replays, in-progress run or personal settings (prefs.save). unique_id is
-# stripped so the game generates a fresh one per tester (it only feeds crash reports and metrics).
-if (-not $NoProfile) {
-    $source = Get-ChildItem (Join-Path $env:APPDATA "SlayTheSpire2\steam\*\modded\profile1\saves\progress.save") -ErrorAction SilentlyContinue |
-        Sort-Object LastWriteTime -Descending | Select-Object -First 1
-    if (-not $source) { throw "No modded profile found to bundle; play once with mods, or pass -NoProfile." }
-    $profileSaves = Join-Path $zipRoot "profile\saves"
-    New-Item -ItemType Directory -Force $profileSaves | Out-Null
-    $json = [IO.File]::ReadAllText($source.FullName)
-    $json = [regex]::Replace($json, ',\s*"unique_id"\s*:\s*"[^"]*"', '')
-    $json = [regex]::Replace($json, '"unique_id"\s*:\s*"[^"]*"\s*,\s*', '')
-    $utf8 = New-Object System.Text.UTF8Encoding($false)
-    foreach ($name in "progress.save", "progress.save.backup") {
-        [IO.File]::WriteAllText((Join-Path $profileSaves $name), $json, $utf8)
-    }
-    Write-Host "Profile  <- $($source.FullName)"
 }
 $zip = "$zipRoot.zip"
 if (Test-Path $zip) { Remove-Item -Force $zip }
