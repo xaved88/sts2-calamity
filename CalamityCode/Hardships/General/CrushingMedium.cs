@@ -50,16 +50,22 @@ public sealed class GutteringBrazier : HardshipRelic
         {
             return;
         }
-        // Hardships can't be melted away.
-        List<RelicModel> meltable = Owner.Relics.Where(r => r is not HardshipRelic && !r.IsMelted).ToList();
+        List<RelicModel> meltable = Owner.Relics.Where(CanMelt).ToList();
         if (meltable.Count == 0)
         {
             return;
         }
         Flash();
         RelicModel victim = await RelicSelectCmd.FromChooseARelicScreen(Owner, meltable) ?? meltable[0];
+        // The game only melts wax relics (Wax Choker's), and throws otherwise; that throw hung the end of combat.
+        victim.IsWax = true;
         await RelicCmd.Melt(victim);
     }
+
+    // Only relics that still do something count: none of Calamity's own (hardships, Trial Writs: melting those would
+    // be free), and no spent ones (e.g. Matryoshka after its chests).
+    private static bool CanMelt(RelicModel relic) =>
+        !relic.IsMelted && !relic.IsUsedUp && relic.GetType().Assembly != typeof(GutteringBrazier).Assembly;
 }
 
 /// <summary>A counter that carries between fights: every 3 of your turns, a Weight is added to your deck.</summary>

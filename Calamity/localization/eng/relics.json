@@ -112,7 +112,7 @@
   "CALAMITY-DOOM_CLOCK.description": "At the start of each combat, start [gold]Ticking[/gold]: from turn [blue]{StartTurn}[/blue], gain [blue]{DoomPower}[/blue] [gold]Doom[/gold] at the start of your turn.",
   "CALAMITY-DOOM_CLOCK.flavor": "Tick.",
   "CALAMITY-GUTTERING_BRAZIER.title": "Guttering Brazier",
-  "CALAMITY-GUTTERING_BRAZIER.description": "Every [blue]{Combats}[/blue] combats, choose one of your relics to [gold]Melt[/gold].",
+  "CALAMITY-GUTTERING_BRAZIER.description": "Every [blue]{Combats}[/blue] combats, choose one of your relics to [gold]Melt[/gold]; it stops working. Calamity relics and used-up relics can't be chosen.",
   "CALAMITY-GUTTERING_BRAZIER.flavor": "It burns whatever you hold dear.",
   "CALAMITY-BALLAST_BOX.title": "Ballast Box",
   "CALAMITY-BALLAST_BOX.description": "Every [blue]{Turns}[/blue] turns, add a [gold]Weight[/gold] to your deck. The count carries between combats.",

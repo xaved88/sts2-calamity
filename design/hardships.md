@@ -89,7 +89,7 @@ Every hardship that affects a fight shows up in that fight as a power, card or r
 
 | Icon | Name | Effect | Visible as | Feasibility |
 | --- | --- | --- | --- | --- |
-| ![](../Calamity/images/relics/packed/guttering_brazier.png) | **Guttering Brazier** | Every 4 combats, choose one of your relics to melt (the wax-relic mechanic). | counter on relic; melted relic greys out | Easy/Medium: vanilla `RelicCmd.Melt` + choose-a-relic screen. Hardships can't be chosen. |
+| ![](../Calamity/images/relics/packed/guttering_brazier.png) | **Guttering Brazier** | Every 4 combats, choose one of your relics to melt (the wax-relic mechanic). | counter on relic; melted relic greys out | Easy/Medium: vanilla `RelicCmd.Melt` (mark the relic wax first: vanilla only melts wax) + choose-a-relic screen. Calamity's own relics (hardships, Trial Writs) and used-up relics can't be chosen. |
 | ![](../Calamity/images/relics/packed/ballast_box.png) | **Ballast Box** | A counter that carries between fights: every 3 turns, add a **Weight** to your deck. Weight: Status, costs 1, removed from your deck when played. | counter on relic; the cards | Medium: custom card; removes its own deck copy. Pace: ~1.5 per fight, maybe every 4. |
 | ![](../Calamity/images/relics/packed/bound_locket.png) | **Bound Locket** | When an ally adds a curse to their deck, you get a copy, *including Pacts*. Multiplayer only. | relic flash; the cards | Medium: patch card-added-to-deck for all players |
 | ![](../Calamity/images/relics/packed/broken_glasses.png) ![](../Calamity/images/powers/blurred_vision_power.png) | **Broken Glasses** | Every enemy-targeted card and potion hits a random enemy. | Blurred Vision power | Medium: Harmony on the card-play target (set once when the play is created) |
