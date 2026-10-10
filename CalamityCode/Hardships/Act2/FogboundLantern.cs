@@ -56,7 +56,17 @@ public sealed class FogboundPower : HardshipPower
 
     public override PowerStackType StackType => PowerStackType.Single;
 
-    // Hooks run on every game; each game only fogs its own local player's hand.
+    // Hooks run on every game; each game only fogs its own local player's hand. Armed before the turn-1 draw so cards
+    // are face-down while they fly in, then everything already in hand is covered once the turn has started.
+    public override Task BeforeHandDraw(Player player, PlayerChoiceContext choiceContext, ICombatState combatState)
+    {
+        if (player.Creature == Owner && LocalContext.IsMe(player))
+        {
+            HandFog.Arm();
+        }
+        return Task.CompletedTask;
+    }
+
     public override Task AfterPlayerTurnStart(PlayerChoiceContext choiceContext, Player player)
     {
         if (player.Creature == Owner && LocalContext.IsMe(player))
@@ -80,23 +90,34 @@ public sealed class FogboundPower : HardshipPower
     }
 }
 
-/// <summary>Local-only presentation: card backs over the hand, no hover tips, deck button disabled.</summary>
+/// <summary>
+/// Local-only presentation: hand cards show a card back, keyword tooltips are off, and the deck button is disabled.
+/// A covered card hides its whole face (the card's Body) rather than laying something over it, so nothing peeks out.
+/// </summary>
 internal static class HandFog
 {
     private const string CardBack = "res://images/packed/run_history/card_back.png";
     private const string OverlayName = "CalamityFog";
 
+    private static readonly List<WeakReference<NCard>> Covered = [];
+
     public static bool IsUp { get; private set; }
 
-    public static void Raise()
+    /// <summary>From now on, every card heading into the local hand is face-down.</summary>
+    public static void Arm()
     {
         IsUp = true;
-        Texture2D? back = ResourceLoader.Load<Texture2D>(CardBack, null, ResourceLoader.CacheMode.Reuse);
+        NRun.Instance?.GlobalUi.TopBar.Deck.Disable();
+    }
+
+    /// <summary>Arm, and cover whatever is already in hand.</summary>
+    public static void Raise()
+    {
+        Arm();
         foreach (NHandCardHolder holder in NPlayerHand.Instance?.ActiveHolders ?? [])
         {
-            Cover(holder.CardNode, back);
+            Cover(holder.CardNode);
         }
-        NRun.Instance?.GlobalUi.TopBar.Deck.Disable();
     }
 
     public static void Lift()
@@ -106,19 +127,24 @@ internal static class HandFog
             return;
         }
         IsUp = false;
-        foreach (NHandCardHolder holder in NPlayerHand.Instance?.Holders ?? [])
+        foreach (WeakReference<NCard> weak in Covered)
         {
-            holder.CardNode?.GetNodeOrNull(OverlayName)?.QueueFree();
+            if (weak.TryGetTarget(out NCard? card) && GodotObject.IsInstanceValid(card))
+            {
+                Uncover(card);
+            }
         }
+        Covered.Clear();
         NRun.Instance?.GlobalUi.TopBar.Deck.Enable();
     }
 
-    internal static void Cover(NCard? card, Texture2D? back)
+    internal static void Cover(NCard? card)
     {
-        if (card == null || card.GetNodeOrNull(OverlayName) != null)
+        if (card == null || !GodotObject.IsInstanceValid(card) || card.GetNodeOrNull(OverlayName) != null)
         {
             return;
         }
+        Texture2D? back = ResourceLoader.Load<Texture2D>(CardBack, null, ResourceLoader.CacheMode.Reuse);
         // NCard draws centred on its origin, at NCard.defaultSize.
         Vector2 size = NCard.defaultSize;
         Control overlay = back != null
@@ -128,9 +154,48 @@ internal static class HandFog
         overlay.MouseFilter = Control.MouseFilterEnum.Ignore;
         overlay.Size = size;
         overlay.Position = -size / 2f;
-        overlay.ZIndex = 10;
+        card.Body.Visible = false;
         card.AddChild(overlay);
+        Covered.Add(new WeakReference<NCard>(card));
     }
+
+    internal static void Uncover(NCard card)
+    {
+        if (card.GetNodeOrNull(OverlayName) is not { } overlay)
+        {
+            return;
+        }
+        card.RemoveChild(overlay);
+        overlay.QueueFree();
+        card.Body.Visible = true;
+    }
+}
+
+/// <summary>
+/// Cards get their hand visuals (UpdateVisuals(Hand)) before they fly in from the draw pile, so covering here hides
+/// them for the whole draw. A card leaving the hand (played, discarded) turns face-up again.
+/// </summary>
+[HarmonyPatch(typeof(NCard), nameof(NCard.UpdateVisuals))]
+internal static class HandFogUpdateVisualsPatch
+{
+    private static void Postfix(NCard __instance, PileType pileType)
+    {
+        if (pileType == PileType.Hand && HandFog.IsUp && __instance.Model is { } model && LocalContext.IsMine(model))
+        {
+            HandFog.Cover(__instance);
+        }
+        else if (pileType != PileType.Hand)
+        {
+            HandFog.Uncover(__instance);
+        }
+    }
+}
+
+/// <summary>Card nodes are pooled: never let a cover survive into a reused node.</summary>
+[HarmonyPatch(typeof(NCard), nameof(NCard.OnReturnedFromPool))]
+internal static class HandFogPoolPatch
+{
+    private static void Postfix(NCard __instance) => HandFog.Uncover(__instance);
 }
 
 /// <summary>No keyword tooltips while the hand is hidden; they'd give the cards away.</summary>
