@@ -68,14 +68,14 @@ public sealed class GutteringBrazier : HardshipRelic
         !relic.IsMelted && !relic.IsUsedUp && relic.GetType().Assembly != typeof(GutteringBrazier).Assembly;
 }
 
-/// <summary>A counter that carries between fights: every 3 of your turns, a Weight is added to your deck.</summary>
+/// <summary>A counter that carries between fights: every 4 of your turns, a Weight is added to your deck and discard pile.</summary>
 public sealed class BallastBox : HardshipRelic
 {
     private int _turnsCounted;
 
     public override HardshipTier Tier => HardshipTier.Crushing;
 
-    protected override IEnumerable<DynamicVar> CanonicalVars => [new DynamicVar("Turns", 3m)];
+    protected override IEnumerable<DynamicVar> CanonicalVars => [new DynamicVar("Turns", 4m)];
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips => [HoverTipFactory.FromCard<Weight>()];
 
@@ -107,15 +107,18 @@ public sealed class BallastBox : HardshipRelic
             return;
         }
         Flash();
-        // Permanent copy in the deck, plus a combat copy shuffled into the draw pile now, linked through DeckVersion (as
-        // vanilla does for every card at combat start) so playing the Weight removes the deck copy too.
+        // Permanent copy in the deck, plus a combat copy in the discard pile now, linked through DeckVersion (as vanilla
+        // does for every card at combat start) so playing the Weight removes the deck copy too.
         CardModel deckCard = Owner.RunState.CreateCard(ModelDb.Card<Weight>(), Owner);
         CardPileAddResult added = await CardPileCmd.Add(deckCard, PileType.Deck);
         if (Owner.Creature.CombatState is { } combat)
         {
+            // The top-bar deck count refreshes when the add "finishes", which normally happens when the preview lands on
+            // the deck. Only the combat copy is previewed, so finish the deck add here (as vanilla's transforms do).
+            deckCard.Pile?.InvokeCardAddFinished();
             CardModel combatCard = combat.CloneCard(deckCard);
             combatCard.DeckVersion = deckCard;
-            added = await CardPileCmd.AddGeneratedCardToCombat(combatCard, PileType.Draw, Owner, CardPilePosition.Random);
+            added = await CardPileCmd.AddGeneratedCardToCombat(combatCard, PileType.Discard, Owner);
         }
         CardCmd.PreviewCardPileAdd(added);
     }
