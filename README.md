@@ -37,6 +37,11 @@ Requires Docker only (the .NET 9 SDK and the art tools run in containers).
 
 - Dev console (`` ` ``) → `unlock ascensions` sets every character (and multiplayer) to A11 on the current profile.
 - `relic add CALAMITY-<NAME>` grants a hardship, e.g. `relic add CALAMITY-LUMPY_COT`.
+- `trial <name> [name2]` (Calamity's own command) gives a Trial Writ for the current act, as the Trial event would;
+  then `travel` and click the boss to check the writ applies it. `fight X_BOSS` won't: it enters a normal fight room.
+  `event CALAMITY-TRIAL_EVENT` runs the real vote instead (3 random trials).
+- `power CALAMITY-<NAME>_POWER <amount> <index>` puts a power straight on a creature (0 = you, 1 = first enemy);
+  `kill 1` kills normally, so death-preventing powers like Rebirth still trigger.
 - Logs: `%APPDATA%\SlayTheSpire2\logs\godot.log` (search `[Calamity]`).
 - Modded play uses a separate profile (`steam/<id>/modded/`).
 
