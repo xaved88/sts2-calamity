@@ -107,7 +107,16 @@ public sealed class BallastBox : HardshipRelic
             return;
         }
         Flash();
-        CardPileAddResult added = await CardPileCmd.Add(Owner.RunState.CreateCard(ModelDb.Card<Weight>(), Owner), PileType.Deck);
+        // Permanent copy in the deck, plus a combat copy shuffled into the draw pile now, linked through DeckVersion (as
+        // vanilla does for every card at combat start) so playing the Weight removes the deck copy too.
+        CardModel deckCard = Owner.RunState.CreateCard(ModelDb.Card<Weight>(), Owner);
+        CardPileAddResult added = await CardPileCmd.Add(deckCard, PileType.Deck);
+        if (Owner.Creature.CombatState is { } combat)
+        {
+            CardModel combatCard = combat.CloneCard(deckCard);
+            combatCard.DeckVersion = deckCard;
+            added = await CardPileCmd.AddGeneratedCardToCombat(combatCard, PileType.Draw, Owner, CardPilePosition.Random);
+        }
         CardCmd.PreviewCardPileAdd(added);
     }
 }

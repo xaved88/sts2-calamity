@@ -116,7 +116,7 @@
   "CALAMITY-GUTTERING_BRAZIER.description": "Every [blue]{Combats}[/blue] combats, choose one of your relics to [gold]Melt[/gold]; it stops working. Calamity relics and used-up relics can't be chosen.",
   "CALAMITY-GUTTERING_BRAZIER.flavor": "It burns whatever you hold dear.",
   "CALAMITY-BALLAST_BOX.title": "Ballast Box",
-  "CALAMITY-BALLAST_BOX.description": "Every [blue]{Turns}[/blue] turns, add a [gold]Weight[/gold] to your deck. The count carries between combats.",
+  "CALAMITY-BALLAST_BOX.description": "Every [blue]{Turns}[/blue] turns, add a [gold]Weight[/gold] to your deck and shuffle one into your draw pile. The count carries between combats.",
   "CALAMITY-BALLAST_BOX.flavor": "It keeps making more of itself.",
   "CALAMITY-BOUND_LOCKET.title": "Bound Locket",
   "CALAMITY-BOUND_LOCKET.description": "Whenever an ally adds a [gold]Curse[/gold] to their deck, add a copy to yours.",
