@@ -12,6 +12,7 @@
   "CALAMITY-MOTH_EATEN_PURSE.title": "Moth-Eaten Purse",
   "CALAMITY-MOTH_EATEN_PURSE.description": "Gain [blue]{GoldLoss}%[/blue] less [gold]Gold[/gold].",
   "CALAMITY-MOTH_EATEN_PURSE.flavor": "The moths have expensive taste.",
+  "CALAMITY-MOTH_EATEN_PURSE.rewardLabel": "{reward} ({received})",
   "CALAMITY-HEAVY_PACK.title": "Heavy Pack",
   "CALAMITY-HEAVY_PACK.description": "At the start of each combat, shuffle [blue]{Cards}[/blue] [gold]Dazed[/gold] into your draw pile.",
   "CALAMITY-HEAVY_PACK.flavor": "You could swear it was lighter when you found it.",
