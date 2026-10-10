@@ -1,4 +1,9 @@
 using Godot;
+using MegaCrit.Sts2.Core.Combat;
+using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Entities.Powers;
+using MegaCrit.Sts2.Core.HoverTips;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -13,9 +18,9 @@ using MegaCrit.Sts2.Core.Rooms;
 namespace Calamity.CalamityCode.Hardships.Act2;
 
 /// <summary>
-/// On each player's first turn of a combat, their hand is face-down until they play a card, and the deck can't be
+/// Every player starts each combat Fogbound: their hand is face-down until they play a card, and the deck can't be
 /// opened (the draw pile can, so if you know your deck you can guess). Innate cards are the counterplay: you know
-/// they're in there. Party-wide; it's purely what each player's own screen shows, so nothing needs syncing.
+/// they're in there. Party-wide; the fog is purely what each player's own screen shows, so nothing needs syncing.
 /// </summary>
 public sealed class FogboundLantern : HardshipRelic
 {
@@ -23,30 +28,55 @@ public sealed class FogboundLantern : HardshipRelic
 
     public override HardshipAct Act => HardshipAct.Act2;
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips => [HoverTipFactory.FromPower<FogboundPower>()];
+
+    protected override async Task AtCombatStart(PlayerChoiceContext choiceContext, ICombatState combatState)
+    {
+        List<Creature> players = combatState.PlayerCreatures.Where(c => c.IsAlive && c.GetPower<FogboundPower>() == null).ToList();
+        if (players.Count == 0)
+        {
+            return;
+        }
+        Flash();
+        await PowerCmd.Apply<FogboundPower>(choiceContext, players, 1m, Owner.Creature, null);
+    }
+
+    // Safety net: never leave the local hand covered after a fight.
+    public override Task AfterCombatEnd(CombatRoom room)
+    {
+        HandFog.Lift();
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>Hand hidden until this player plays a card; then the power is removed.</summary>
+public sealed class FogboundPower : HardshipPower
+{
+    public override PowerType Type => PowerType.Debuff;
+
+    public override PowerStackType StackType => PowerStackType.Single;
+
     // Hooks run on every game; each game only fogs its own local player's hand.
     public override Task AfterPlayerTurnStart(PlayerChoiceContext choiceContext, Player player)
     {
-        if (LocalContext.IsMe(player) && player.PlayerCombatState?.TurnNumber == 1)
+        if (player.Creature == Owner && LocalContext.IsMe(player))
         {
-            Flash();
             HandFog.Raise();
         }
         return Task.CompletedTask;
     }
 
-    public override Task AfterCardPlayed(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    public override async Task AfterCardPlayed(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        if (cardPlay.Card.Owner.Creature != Owner)
+        {
+            return;
+        }
         if (LocalContext.IsMe(cardPlay.Card.Owner))
         {
             HandFog.Lift();
         }
-        return Task.CompletedTask;
-    }
-
-    public override Task AfterCombatEnd(CombatRoom room)
-    {
-        HandFog.Lift();
-        return Task.CompletedTask;
+        await PowerCmd.Remove(this);
     }
 }
 

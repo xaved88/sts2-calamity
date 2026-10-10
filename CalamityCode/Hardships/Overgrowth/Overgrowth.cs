@@ -3,6 +3,7 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
@@ -32,37 +33,39 @@ public sealed class PollenSachet : HardshipRelic
     }
 }
 
-/// <summary>The first Attack you play each turn deals 1 damage to you.</summary>
-public sealed class ThistleGrip : HardshipRelic
+/// <summary>You have Thorny Grip: the first Attack you play each turn deals 1 damage to you.</summary>
+public sealed class ThistleGrip : PlayerPowerHardship<ThornyGripPower>
 {
-    private int _lastTurnStung;
-
     public override HardshipTier Tier => HardshipTier.Trying;
 
     public override HardshipAct Act => HardshipAct.Overgrowth;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [new DamageVar(1m, ValueProp.Unpowered)];
 
+    protected override decimal PowerAmount => DynamicVars.Damage.BaseValue;
+}
+
+public sealed class ThornyGripPower : HardshipPower
+{
+    private int _lastTurnStung;
+
+    public override PowerType Type => PowerType.Debuff;
+
     public override async Task AfterCardPlayed(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (cardPlay.Card.Owner != Owner || cardPlay.Card.Type != CardType.Attack || _lastTurnStung == TurnNumber)
+        int turn = Owner.Player?.PlayerCombatState?.TurnNumber ?? 0;
+        if (cardPlay.Card.Owner.Creature != Owner || cardPlay.Card.Type != CardType.Attack || _lastTurnStung == turn)
         {
             return;
         }
-        _lastTurnStung = TurnNumber;
+        _lastTurnStung = turn;
         Flash();
-        await CreatureCmd.Damage(choiceContext, Owner.Creature, DynamicVars.Damage.BaseValue, ValueProp.Unpowered, null, null);
-    }
-
-    public override Task AfterCombatEnd(MegaCrit.Sts2.Core.Rooms.CombatRoom room)
-    {
-        _lastTurnStung = 0;
-        return Task.CompletedTask;
+        await CreatureCmd.Damage(choiceContext, Owner, Amount, ValueProp.Unpowered, null, null);
     }
 }
 
-/// <summary>When an enemy dies, every player gains 1 Weak.</summary>
-public sealed class PuffballSpore : HardshipRelic
+/// <summary>Enemies carry a Spore Cloud: when one dies, every player gains 1 Weak.</summary>
+public sealed class PuffballSpore : EnemyPowerHardship<SporeCloudPower>
 {
     public override HardshipTier Tier => HardshipTier.Crippling;
 
@@ -70,16 +73,22 @@ public sealed class PuffballSpore : HardshipRelic
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [new PowerVar<WeakPower>(1m)];
 
-    protected override IEnumerable<IHoverTip> ExtraHoverTips => [HoverTipFactory.FromPower<WeakPower>()];
+    protected override decimal PowerAmount => DynamicVars.Weak.BaseValue;
+}
+
+/// <summary>Amount = Weak each player gains when this dies.</summary>
+public sealed class SporeCloudPower : HardshipPower
+{
+    public override PowerType Type => PowerType.Buff;
 
     public override async Task AfterDeath(PlayerChoiceContext choiceContext, Creature creature, bool wasRemovalPrevented, float deathAnimLength)
     {
-        if (!creature.IsEnemy || wasRemovalPrevented || creature.CombatState is not { } combat)
+        if (creature != Owner || wasRemovalPrevented || Owner.CombatState is not { } combat)
         {
             return;
         }
         Flash();
-        await PowerCmd.Apply<WeakPower>(choiceContext, combat.PlayerCreatures.Where(c => c.IsAlive), DynamicVars.Weak.BaseValue, creature, null);
+        await PowerCmd.Apply<WeakPower>(choiceContext, combat.PlayerCreatures.Where(c => c.IsAlive), Amount, Owner, null);
     }
 }
 

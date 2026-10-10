@@ -4,6 +4,7 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
@@ -131,20 +132,30 @@ public sealed class BoundLocket : HardshipRelic
     }
 }
 
-/// <summary>Every enemy-targeted card and potion you use hits a random enemy instead (see BrokenGlassesPatches).</summary>
-public sealed class BrokenGlasses : HardshipRelic
+/// <summary>You have Blurred Vision: cards and potions you aim at an enemy hit a random enemy instead.</summary>
+public sealed class BrokenGlasses : PlayerPowerHardship<BlurredVisionPower>
 {
     public override HardshipTier Tier => HardshipTier.Crushing;
 
-    /// <summary>Picks the redirected target from the run's shared combat-targets RNG, so every client agrees.</summary>
+    protected override decimal PowerAmount => 1m;
+}
+
+/// <summary>The redirect itself happens in BrokenGlassesCardPatch / BrokenGlassesPotionPatch (the target is fixed when a play is created).</summary>
+public sealed class BlurredVisionPower : HardshipPower
+{
+    public override PowerType Type => PowerType.Debuff;
+
+    public override PowerStackType StackType => PowerStackType.Single;
+
+    /// <summary>Picks the new target from the run's shared combat-targets RNG, so every client agrees.</summary>
     internal Creature Redirect(Creature target)
     {
         List<Creature> enemies = target.CombatState?.HittableEnemies.ToList() ?? [];
-        if (!target.IsEnemy || enemies.Count < 2)
+        if (!target.IsEnemy || enemies.Count < 2 || Owner.Player is not { } player)
         {
             return target;
         }
-        Creature? pick = Owner.RunState.Rng.CombatTargets.NextItem(enemies);
+        Creature? pick = player.RunState.Rng.CombatTargets.NextItem(enemies);
         if (pick != null && pick != target)
         {
             Flash();
@@ -171,9 +182,9 @@ internal static class BrokenGlassesCardPatch
 {
     private static void Prefix(CardModel __instance, ref Creature? target)
     {
-        if (target != null && __instance.TargetType == TargetType.AnyEnemy && __instance.Owner.GetRelic<BrokenGlasses>() is { } glasses)
+        if (target != null && __instance.TargetType == TargetType.AnyEnemy && __instance.Owner.Creature.GetPower<BlurredVisionPower>() is { } blur)
         {
-            target = glasses.Redirect(target);
+            target = blur.Redirect(target);
         }
     }
 }
@@ -183,9 +194,9 @@ internal static class BrokenGlassesPotionPatch
 {
     private static void Prefix(PotionModel __instance, ref Creature? target)
     {
-        if (target != null && __instance.TargetType == TargetType.AnyEnemy && __instance.Owner.GetRelic<BrokenGlasses>() is { } glasses)
+        if (target != null && __instance.TargetType == TargetType.AnyEnemy && __instance.Owner.Creature.GetPower<BlurredVisionPower>() is { } blur)
         {
-            target = glasses.Redirect(target);
+            target = blur.Redirect(target);
         }
     }
 }

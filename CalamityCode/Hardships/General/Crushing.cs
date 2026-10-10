@@ -1,24 +1,25 @@
 using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
-using MegaCrit.Sts2.Core.Models;
 
 namespace Calamity.CalamityCode.Hardships.General;
 
-/// <summary>Draw 1 fewer card every turn.</summary>
-public sealed class LeadBookmark : HardshipRelic
+/// <summary>You're Drowsy: draw 1 fewer card each turn.</summary>
+public sealed class LeadBookmark : PlayerPowerHardship<DrowsyPower>
 {
     public override HardshipTier Tier => HardshipTier.Crushing;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [new CardsVar(1)];
 
+    protected override decimal PowerAmount => DynamicVars.Cards.BaseValue;
+}
+
+public sealed class DrowsyPower : HardshipPower
+{
+    public override PowerType Type => PowerType.Debuff;
+
     public override decimal ModifyHandDraw(Player player, decimal count)
     {
-        return player == Owner ? Math.Max(0m, count - DynamicVars.Cards.BaseValue) : count;
-    }
-
-    public override Task AfterModifyingHandDraw()
-    {
-        Flash();
-        return Task.CompletedTask;
+        return player.Creature == Owner ? Math.Max(0m, count - Amount) : count;
     }
 }

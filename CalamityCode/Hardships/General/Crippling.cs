@@ -15,25 +15,13 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace Calamity.CalamityCode.Hardships.General;
 
 /// <summary>Enemies have Backlash: whenever they lose Strength, they regain 25% of it (rounded up) permanently.</summary>
-public sealed class SpitefulTotem : HardshipRelic
+public sealed class SpitefulTotem : EnemyPowerHardship<BacklashPower>
 {
     public override HardshipTier Tier => HardshipTier.Crippling;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [new DynamicVar("Percent", 25m)];
 
-    protected override IEnumerable<IHoverTip> ExtraHoverTips => [HoverTipFactory.FromPower<BacklashPower>()];
-
-    protected override Task AtCombatStart(PlayerChoiceContext choiceContext, ICombatState combatState) =>
-        ApplyToEnemies<BacklashPower>(choiceContext, combatState, DynamicVars["Percent"].BaseValue);
-
-    /// <summary>Enemies summoned mid-combat get it too.</summary>
-    public override async Task AfterCreatureAddedToCombat(Creature creature)
-    {
-        if (creature.IsEnemy && TurnNumber >= 1 && creature.GetPower<BacklashPower>() == null)
-        {
-            await PowerCmd.Apply<BacklashPower>(new ThrowingPlayerChoiceContext(), creature, DynamicVars["Percent"].BaseValue, Owner.Creature, null);
-        }
-    }
+    protected override decimal PowerAmount => DynamicVars["Percent"].BaseValue;
 }
 
 /// <summary>
@@ -83,46 +71,60 @@ public sealed class WarDrum : HardshipRelic
         ApplyToEnemies<StrengthPower>(choiceContext, combatState, DynamicVars["StrengthPower"].BaseValue);
 }
 
-/// <summary>When an enemy dies, the other enemies gain 1 Strength.</summary>
-public sealed class MourningBell : HardshipRelic
+/// <summary>Enemies are Mourning: when one dies, the others gain 1 Strength.</summary>
+public sealed class MourningBell : EnemyPowerHardship<MourningPower>
 {
     public override HardshipTier Tier => HardshipTier.Crippling;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [new PowerVar<StrengthPower>(1m)];
 
-    protected override IEnumerable<IHoverTip> ExtraHoverTips => [HoverTipFactory.FromPower<StrengthPower>()];
+    protected override decimal PowerAmount => DynamicVars["StrengthPower"].BaseValue;
+}
+
+/// <summary>Amount = Strength the other enemies gain when this one dies.</summary>
+public sealed class MourningPower : HardshipPower
+{
+    public override PowerType Type => PowerType.Buff;
 
     public override async Task AfterDeath(PlayerChoiceContext choiceContext, Creature creature, bool wasRemovalPrevented, float deathAnimLength)
     {
-        if (!creature.IsEnemy || wasRemovalPrevented || creature.CombatState is not { } combat)
+        if (creature != Owner || wasRemovalPrevented || Owner.CombatState is not { } combat)
         {
             return;
         }
-        List<Creature> survivors = combat.HittableEnemies.Where(e => e != creature).ToList();
+        List<Creature> survivors = combat.HittableEnemies.Where(e => e != Owner && e.IsAlive).ToList();
         if (survivors.Count == 0)
         {
             return;
         }
         Flash();
-        await PowerCmd.Apply<StrengthPower>(choiceContext, survivors, DynamicVars["StrengthPower"].BaseValue, Owner.Creature, null);
+        await PowerCmd.Apply<StrengthPower>(choiceContext, survivors, Amount, Owner, null);
     }
 }
 
-/// <summary>When an enemy dies, it deals 3 damage to each player.</summary>
-public sealed class MartyrsFuse : HardshipRelic
+/// <summary>Enemies are Volatile: when one dies, it deals 3 damage to each player.</summary>
+public sealed class MartyrsFuse : EnemyPowerHardship<VolatilePower>
 {
     public override HardshipTier Tier => HardshipTier.Crippling;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [new DamageVar(3m, ValueProp.Unpowered)];
 
+    protected override decimal PowerAmount => DynamicVars.Damage.BaseValue;
+}
+
+/// <summary>Amount = damage dealt to each player when this dies.</summary>
+public sealed class VolatilePower : HardshipPower
+{
+    public override PowerType Type => PowerType.Buff;
+
     public override async Task AfterDeath(PlayerChoiceContext choiceContext, Creature creature, bool wasRemovalPrevented, float deathAnimLength)
     {
-        if (!creature.IsEnemy || wasRemovalPrevented || creature.CombatState is not { } combat)
+        if (creature != Owner || wasRemovalPrevented || Owner.CombatState is not { } combat)
         {
             return;
         }
         Flash();
-        await CreatureCmd.Damage(choiceContext, combat.PlayerCreatures.Where(c => c.IsAlive), DynamicVars.Damage.BaseValue, ValueProp.Unpowered, null, null);
+        await CreatureCmd.Damage(choiceContext, combat.PlayerCreatures.Where(c => c.IsAlive), Amount, ValueProp.Unpowered, null, null);
     }
 }
 

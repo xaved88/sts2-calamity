@@ -52,23 +52,34 @@ public sealed class DampPower : HardshipPower
     }
 }
 
-/// <summary>Whenever an enemy deals unblocked attack damage to a player, add a Slimed to that player's discard pile.</summary>
-public sealed class BilgeBucket : HardshipRelic
+/// <summary>Enemies are Slimy: their unblocked attacks add a Slimed to the target's discard pile.</summary>
+public sealed class BilgeBucket : EnemyPowerHardship<SlimyPower>
 {
     public override HardshipTier Tier => HardshipTier.Crippling;
 
     public override HardshipAct Act => HardshipAct.Underdocks;
 
-    protected override IEnumerable<IHoverTip> ExtraHoverTips => [HoverTipFactory.FromCard<Slimed>()];
+    protected override IEnumerable<IHoverTip> ExtraHoverTips => [HoverTipFactory.FromPower<SlimyPower>(), HoverTipFactory.FromCard<Slimed>()];
+
+    protected override decimal PowerAmount => 1m;
+}
+
+/// <summary>Amount = Slimed added per unblocked attack hit.</summary>
+public sealed class SlimyPower : HardshipPower
+{
+    public override PowerType Type => PowerType.Buff;
 
     public override async Task AfterDamageGiven(PlayerChoiceContext choiceContext, Creature? dealer, DamageResult result, ValueProp props, Creature target, CardModel? cardSource)
     {
-        if (dealer is not { IsEnemy: true } || target.Player is not { } victim || result.UnblockedDamage <= 0 || !props.IsPoweredAttack() || target.CombatState is not { } combat)
+        if (dealer != Owner || target.Player is not { } victim || result.UnblockedDamage <= 0 || !props.IsPoweredAttack() || Owner.CombatState is not { } combat)
         {
             return;
         }
         Flash();
-        await CardPileCmd.AddGeneratedCardToCombat(combat.CreateCard<Slimed>(victim), PileType.Discard, victim);
+        for (int i = 0; i < Amount; i++)
+        {
+            await CardPileCmd.AddGeneratedCardToCombat(combat.CreateCard<Slimed>(victim), PileType.Discard, victim);
+        }
     }
 }
 

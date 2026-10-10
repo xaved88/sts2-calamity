@@ -1,4 +1,9 @@
 using HarmonyLib;
+using MegaCrit.Sts2.Core.Combat;
+using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Entities.Powers;
+using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Entities.Merchant;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Models;
@@ -8,14 +13,30 @@ using MegaCrit.Sts2.Core.Runs;
 
 namespace Calamity.CalamityCode.Hardships.Underdocks;
 
-/// <summary>You can't use potions on your first turn of each combat (enforced in SoggyBandolierPatches).</summary>
-public sealed class SoggyBandolier : HardshipRelic
+/// <summary>You start each combat Soaked: no potions until your first turn ends (enforced in SoggyBandolierPatches).</summary>
+public sealed class SoggyBandolier : PlayerPowerHardship<SoakedPower>
 {
     public override HardshipTier Tier => HardshipTier.Trying;
 
     public override HardshipAct Act => HardshipAct.Underdocks;
 
-    internal bool BlocksPotions => InCombat && TurnNumber <= 1;
+    protected override decimal PowerAmount => 1m;
+}
+
+/// <summary>Can't use potions while this is on you. Removed at the end of your turn.</summary>
+public sealed class SoakedPower : HardshipPower
+{
+    public override PowerType Type => PowerType.Debuff;
+
+    public override PowerStackType StackType => PowerStackType.Single;
+
+    public override async Task AfterSideTurnEnd(PlayerChoiceContext choiceContext, CombatSide side, IEnumerable<Creature> participants)
+    {
+        if (side == CombatSide.Player && participants.Contains(Owner))
+        {
+            await PowerCmd.Remove(this);
+        }
+    }
 }
 
 /// <summary>
@@ -86,7 +107,7 @@ internal static class SoggyBandolierPatches
 
     private static void Postfix(PotionModel __instance, ref bool __result)
     {
-        if (__result && __instance.Owner?.GetRelic<SoggyBandolier>() is { BlocksPotions: true })
+        if (__result && __instance.Owner?.Creature.GetPower<SoakedPower>() != null)
         {
             __result = false;
         }

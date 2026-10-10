@@ -6,15 +6,15 @@ namespace Calamity.CalamityCode.Patches;
 
 /// <summary>
 /// Adds "Calamity" under the main menu logo. It's parented to the logo node, so it fades with it when submenus open.
-/// Placement comes from the logo's Spine skeleton bounds (x 611..2185, y 8..966 in logo space).
+/// Horizontal placement comes from the logo's Spine skeleton bounds (x 611..2185 in logo space); the vertical
+/// position was tuned in game so it sits between the bottom of "SPIRE" and the first menu button.
 /// </summary>
 [HarmonyPatch(typeof(NMainMenuBg), nameof(NMainMenuBg._Ready))]
 internal static class MainMenuTitlePatch
 {
     private const float LogoLeft = 611f;
     private const float LogoWidth = 1574f;
-    // Just below the artwork; nudge this if it overlaps or sits too low.
-    private const float Top = 900f;
+    private const float Top = 1190f;
 
     private static void Postfix(NMainMenuBg __instance)
     {
@@ -36,8 +36,8 @@ internal static class MainMenuTitlePatch
         {
             label.AddThemeFontOverride("font", font);
         }
-        label.AddThemeFontSizeOverride("font_size", 128);
-        label.AddThemeConstantOverride("outline_size", 18);
+        label.AddThemeFontSizeOverride("font_size", 112);
+        label.AddThemeConstantOverride("outline_size", 16);
         label.AddThemeColorOverride("font_color", new Color(0.78f, 0.1f, 0.14f));
         label.AddThemeColorOverride("font_outline_color", new Color(0.06f, 0.02f, 0.03f));
         logo.AddChild(label);

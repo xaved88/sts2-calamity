@@ -74,54 +74,81 @@ public sealed class RageThresholdPower : HardshipPower
     }
 }
 
-/// <summary>You can play only 1 Attack per turn.</summary>
-public sealed class IronManacle : HardshipRelic
+/// <summary>You're Manacled: you can play only 1 Attack each turn.</summary>
+public sealed class IronManacle : PlayerPowerHardship<ManacledPower>
 {
-    private int _attackTurn = -1;
-
     public override HardshipTier Tier => HardshipTier.Crushing;
 
     public override HardshipAct Act => HardshipAct.Act3;
 
-    public override bool ShouldPlay(CardModel card, MegaCrit.Sts2.Core.Entities.Cards.AutoPlayType autoPlayType)
+    protected override decimal PowerAmount => 1m;
+}
+
+/// <summary>Amount = Attacks allowed per turn.</summary>
+public sealed class ManacledPower : HardshipPower
+{
+    private int _turn = -1;
+    private int _attacksThisTurn;
+
+    public override PowerType Type => PowerType.Debuff;
+
+    private int Turn => Owner.Player?.PlayerCombatState?.TurnNumber ?? 0;
+
+    private int AttacksThisTurn => _turn == Turn ? _attacksThisTurn : 0;
+
+    public override bool ShouldPlay(CardModel card, AutoPlayType autoPlayType)
     {
-        return card.Owner != Owner || card.Type != CardType.Attack || _attackTurn != TurnNumber;
+        return card.Owner.Creature != Owner || card.Type != CardType.Attack || AttacksThisTurn < Amount;
     }
 
     public override Task AfterCardPlayed(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (cardPlay.Card.Owner == Owner && cardPlay.Card.Type == CardType.Attack)
+        if (cardPlay.Card.Owner.Creature == Owner && cardPlay.Card.Type == CardType.Attack)
         {
-            _attackTurn = TurnNumber;
-            Flash();
+            _attacksThisTurn = AttacksThisTurn + 1;
+            _turn = Turn;
+            if (_attacksThisTurn >= Amount)
+            {
+                Flash();
+            }
         }
-        return Task.CompletedTask;
-    }
-
-    public override Task AfterCombatEnd(CombatRoom room)
-    {
-        _attackTurn = -1;
         return Task.CompletedTask;
     }
 }
 
-/// <summary>1 less Energy on your first two turns.</summary>
-public sealed class FrozenEmber : HardshipRelic
+/// <summary>You start each combat Frozen: 1 less Energy on your first 2 turns.</summary>
+public sealed class FrozenEmber : PlayerPowerHardship<FrozenPower>
 {
     public override HardshipTier Tier => HardshipTier.Crushing;
 
     public override HardshipAct Act => HardshipAct.Act3;
 
-    protected override IEnumerable<DynamicVar> CanonicalVars => [new EnergyVar(1)];
+    protected override IEnumerable<DynamicVar> CanonicalVars => [new DynamicVar("Turns", 2m)];
+
+    protected override decimal PowerAmount => DynamicVars["Turns"].BaseValue;
+}
+
+/// <summary>Amount = turns left; 1 less Energy while it lasts. Applied before the first energy reset.</summary>
+public sealed class FrozenPower : HardshipPower
+{
+    public override PowerType Type => PowerType.Debuff;
 
     public override decimal ModifyMaxEnergy(Player player, decimal amount)
     {
-        return player == Owner && TurnNumber is >= 1 and <= 2 ? amount - DynamicVars.Energy.BaseValue : amount;
+        return player.Creature == Owner ? amount - 1m : amount;
+    }
+
+    public override async Task AfterSideTurnEnd(PlayerChoiceContext choiceContext, CombatSide side, IEnumerable<Creature> participants)
+    {
+        if (side == CombatSide.Player && participants.Contains(Owner))
+        {
+            await PowerCmd.Decrement(this);
+        }
     }
 }
 
-/// <summary>From turn 3, gain 3 Doom at the start of each of your turns (vanilla Doom: die at end of turn if Doom >= HP).</summary>
-public sealed class DoomClock : HardshipRelic
+/// <summary>Doom Clock: counts down from 3; from then on, gain 3 Doom at the start of each of your turns.</summary>
+public sealed class DoomClock : PlayerPowerHardship<TickingPower>
 {
     public override HardshipTier Tier => HardshipTier.Crushing;
 
@@ -129,15 +156,39 @@ public sealed class DoomClock : HardshipRelic
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [new PowerVar<DoomPower>(3m), new DynamicVar("StartTurn", 3m)];
 
-    protected override IEnumerable<IHoverTip> ExtraHoverTips => [HoverTipFactory.FromPower<DoomPower>()];
+    protected override IEnumerable<IHoverTip> ExtraHoverTips => [HoverTipFactory.FromPower<TickingPower>(), HoverTipFactory.FromPower<DoomPower>()];
+
+    protected override decimal PowerAmount => DynamicVars["StartTurn"].BaseValue;
+}
+
+/// <summary>
+/// Amount counts down by 1 at the start of each of your turns (3 -> 2 -> 1). While it's at 1, gain Doom at the start of
+/// each turn, so Doom starts on turn 3.
+/// </summary>
+public sealed class TickingPower : HardshipPower
+{
+    private const int DoomPerTurn = 3;
+
+    public override PowerType Type => PowerType.Debuff;
 
     public override async Task AfterPlayerTurnStart(PlayerChoiceContext choiceContext, Player player)
     {
-        if (player != Owner || TurnNumber < DynamicVars["StartTurn"].IntValue)
+        if (player.Creature != Owner)
         {
             return;
         }
-        Flash();
-        await PowerCmd.Apply<DoomPower>(choiceContext, Owner.Creature, DynamicVars["DoomPower"].BaseValue, Owner.Creature, null);
+        if (Amount > 1)
+        {
+            await PowerCmd.Decrement(this);
+            if (Amount > 1)
+            {
+                return;
+            }
+        }
+        if (player.PlayerCombatState?.TurnNumber >= 3)
+        {
+            Flash();
+            await PowerCmd.Apply<DoomPower>(choiceContext, Owner, DoomPerTurn, Owner, null);
+        }
     }
 }

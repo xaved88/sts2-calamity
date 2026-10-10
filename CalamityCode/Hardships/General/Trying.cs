@@ -180,21 +180,28 @@ public sealed class LeakyFlask : HardshipRelic
     }
 }
 
-/// <summary>Whenever you shuffle your draw pile, lose 1 HP.</summary>
-public sealed class FleaRiddenBlanket : HardshipRelic
+/// <summary>You're Itchy: whenever you shuffle your draw pile, lose 1 HP.</summary>
+public sealed class FleaRiddenBlanket : PlayerPowerHardship<ItchyPower>
 {
     public override HardshipTier Tier => HardshipTier.Trying;
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [new DynamicVar("HpLoss", 1m)];
 
+    protected override decimal PowerAmount => DynamicVars["HpLoss"].BaseValue;
+}
+
+public sealed class ItchyPower : HardshipPower
+{
+    public override PowerType Type => PowerType.Debuff;
+
     public override async Task AfterShuffle(PlayerChoiceContext choiceContext, Player shuffler)
     {
-        if (shuffler != Owner)
+        if (shuffler.Creature != Owner)
         {
             return;
         }
         Flash();
-        await LoseHp(choiceContext, DynamicVars["HpLoss"].BaseValue);
+        await CreatureCmd.Damage(choiceContext, Owner, Amount, ValueProp.Unblockable | ValueProp.Unpowered, null, null);
     }
 }
 

@@ -363,6 +363,79 @@ POWERS = {
   <g fill="{INK}"><ellipse cx="102" cy="110" rx="18" ry="20"/><ellipse cx="154" cy="110" rx="18" ry="20"/></g>
   <path d="M40 210 L216 210" stroke="{RED}" stroke-width="16" stroke-linecap="round"/>
   <path d="M128 196 L128 222" stroke="{INK}" stroke-width="10"/>''',
+    # Hardship powers (the visible, in-combat face of each combat hardship).
+    "itchy_power": f'''
+  <circle cx="128" cy="128" r="80" fill="#e8b4a0" {S}/>
+  <g fill="{INK}"><circle cx="96" cy="104" r="9"/><circle cx="150" cy="96" r="8"/><circle cx="120" cy="150" r="9"/><circle cx="166" cy="146" r="7"/><circle cx="92" cy="168" r="6"/></g>
+  <path d="M60 60 L84 84 M196 60 L172 84" stroke="{RED}" stroke-width="10" stroke-linecap="round"/>''',
+    "mourning_power": f'''
+  <path d="M128 40 C96 40 92 90 88 130 C86 150 70 158 66 170 L190 170 C186 158 170 150 168 130 C164 90 160 40 128 40 Z" fill="#3a3446" {S}/>
+  <circle cx="128" cy="190" r="14" fill="#3a3446" {S5}/>
+  <path d="M168 96 C176 116 196 116 192 96 L182 74 Z" fill="#9fd3ef" {S5}/>''',
+    "volatile_power": f'''
+  <circle cx="116" cy="146" r="72" fill="#3b3644" {S}/>
+  <path d="M160 86 C182 60 196 76 212 52" fill="none" {S}/>
+  <path d="M212 52 l-6 -22 l14 14 l10 -18 l0 22 l20 -2 l-18 12 l14 14 l-22 -8 l-8 18 z" fill="{GOLD}" stroke="{RED}" stroke-width="4" stroke-linejoin="round"/>''',
+    "drowsy_power": f'''
+  <path d="M60 150 C60 110 196 110 196 150 C196 160 60 160 60 150 Z" fill="{BONE}" {S}/>
+  <path d="M70 152 C100 170 156 170 186 152" fill="none" {S}/>
+  <path d="M150 50 L190 50 L150 96 L190 96" fill="none" stroke="{INK}" stroke-width="18" stroke-linejoin="round"/>
+  <path d="M150 50 L190 50 L150 96 L190 96" fill="none" stroke="#9fd3ef" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M200 20 L226 20 L200 48 L226 48" fill="none" stroke="{INK}" stroke-width="14" stroke-linejoin="round"/>
+  <path d="M200 20 L226 20 L200 48 L226 48" fill="none" stroke="#9fd3ef" stroke-width="6" stroke-linejoin="round"/>''',
+    "blurred_vision_power": f'''
+  <g opacity="0.55" transform="translate(-18 -10)"><path d="M40 128 C80 70 176 70 216 128 C176 186 80 186 40 128 Z" fill="#f7efe6" {S}/><circle cx="128" cy="128" r="28" fill="#5b2a6e"/></g>
+  <g transform="translate(14 10)"><path d="M40 128 C80 70 176 70 216 128 C176 186 80 186 40 128 Z" fill="#f7efe6" {S}/><circle cx="128" cy="128" r="28" fill="#5b2a6e" {S5}/></g>''',
+    "thorny_grip_power": f'''
+  <path d="M76 220 L76 140 L64 106 L80 100 L94 128 L94 70 L114 70 L116 120 L118 56 L140 56 L140 120 L144 66 L164 68 L162 128 L172 96 L190 102 L176 160 L174 220 Z" fill="#e8b4a0" {S}/>
+  <path d="M40 150 C80 130 120 170 220 120" fill="none" stroke="{INK}" stroke-width="14" stroke-linecap="round"/>
+  <path d="M40 150 C80 130 120 170 220 120" fill="none" stroke="{GREEN}" stroke-width="6" stroke-linecap="round"/>
+  <g fill="{BONE}" {S5}><path d="M90 136 l-8 -18 l18 8z"/><path d="M150 140 l4 -20 l10 16z"/></g>''',
+    "spore_cloud_power": f'''
+  <g fill="{SLIME}" {S}><circle cx="90" cy="140" r="44"/><circle cx="140" cy="110" r="52"/><circle cx="176" cy="156" r="40"/></g>
+  <g fill="#e6f5b0"><circle cx="110" cy="130" r="6"/><circle cx="150" cy="96" r="7"/><circle cx="176" cy="150" r="6"/><circle cx="90" cy="160" r="5"/></g>''',
+    "slimy_power": f'''
+  <path d="M128 36 C150 90 200 120 200 166 C200 204 166 226 128 226 C90 226 56 204 56 166 C56 120 106 90 128 36 Z" fill="{SLIME}" {S}/>
+  <g fill="{INK}"><circle cx="108" cy="160" r="9"/><circle cx="150" cy="160" r="9"/></g>''',
+    "soaked_power": f'''
+  <rect x="96" y="70" width="64" height="120" rx="14" fill="{RED}" {S}/>
+  <rect x="104" y="48" width="48" height="26" rx="6" fill="{DARKWOOD}" {S5}/>
+  <g fill="{BLUE}" {S5}><path d="M60 120 C48 146 82 150 78 128 L70 104 Z"/><path d="M196 150 C184 176 218 180 214 158 L206 134 Z"/><path d="M128 206 C120 226 144 228 142 212 L136 196 Z"/></g>''',
+    "rusted_power": f'''
+  <path d="M128 30 L208 60 L208 130 C208 180 170 210 128 228 C86 210 48 180 48 130 L48 60 Z" fill="{IRON}" {S}/>
+  <g fill="{RUST}"><ellipse cx="100" cy="100" rx="30" ry="20"/><ellipse cx="160" cy="160" rx="28" ry="22"/><ellipse cx="150" cy="84" rx="14" ry="10"/></g>''',
+    "cramped_power": f'''
+  <g {S}><rect x="40" y="70" width="70" height="100" rx="8" fill="{BONE}" transform="rotate(-14 75 120)"/><rect x="96" y="66" width="70" height="100" rx="8" fill="{BONE}"/><rect x="150" y="70" width="70" height="100" rx="8" fill="{BONE}" transform="rotate(14 185 120)"/></g>
+  <path d="M30 200 L80 200 M226 200 L176 200" stroke="{RED}" stroke-width="14" stroke-linecap="round"/>
+  <path d="M80 200 l-16 -12 M80 200 l-16 12 M176 200 l16 -12 M176 200 l16 12" stroke="{RED}" stroke-width="10" stroke-linecap="round"/>''',
+    "shared_lifeblood_power": f'''
+  <path d="M88 92 C70 64 30 76 36 112 C40 140 88 168 88 168 C88 168 136 140 140 112 C146 76 106 64 88 92 Z" fill="{RED}" {S}/>
+  <path d="M168 112 C150 84 110 96 116 132 C120 160 168 188 168 188 C168 188 216 160 220 132 C226 96 186 84 168 112 Z" fill="{BLOOD}" {S}/>''',
+    "clouded_power": f'''
+  <g fill="#c9cbd6" {S}><circle cx="90" cy="140" r="40"/><circle cx="140" cy="114" r="50"/><circle cx="180" cy="148" r="36"/><rect x="60" y="140" width="150" height="40" rx="20"/></g>''',
+    "fogbound_power": f'''
+  <rect x="70" y="50" width="116" height="160" rx="12" fill="#5b4a6e" {S}/>
+  <path d="M90 70 L166 70 L166 190 L90 190 Z" fill="none" stroke="#8a77a0" stroke-width="6"/>
+  <g fill="#dfe4ea" opacity="0.9"><ellipse cx="80" cy="110" rx="50" ry="18"/><ellipse cx="176" cy="150" rx="54" ry="18"/><ellipse cx="110" cy="196" rx="50" ry="16"/></g>''',
+    "manacled_power": f'''
+  <circle cx="92" cy="140" r="52" fill="none" stroke="{INK}" stroke-width="34"/>
+  <circle cx="92" cy="140" r="52" fill="none" stroke="{IRON}" stroke-width="20"/>
+  <path d="M142 128 L186 116 C200 112 212 124 206 138" fill="none" stroke="{INK}" stroke-width="22" stroke-linecap="round"/>
+  <path d="M142 128 L186 116 C200 112 212 124 206 138" fill="none" stroke="{DARKIRON}" stroke-width="10" stroke-linecap="round"/>''',
+    "frozen_power": f'''
+  <g stroke="{INK}" stroke-width="22" stroke-linecap="round"><path d="M128 36 L128 220 M48 82 L208 174 M48 174 L208 82"/></g>
+  <g stroke="{ICE}" stroke-width="10" stroke-linecap="round"><path d="M128 36 L128 220 M48 82 L208 174 M48 174 L208 82"/></g>
+  <circle cx="128" cy="128" r="20" fill="#e8f6fd" {S5}/>''',
+    "ticking_power": f'''
+  <circle cx="128" cy="132" r="84" fill="#3a2a4a" {S}/>
+  <circle cx="128" cy="132" r="62" fill="#d9cfe6" {S5}/>
+  <path d="M128 132 L128 88 M128 132 L162 152" stroke="{INK}" stroke-width="10" stroke-linecap="round"/>
+  <path d="M76 52 L60 34 M180 52 L196 34" stroke="{INK}" stroke-width="12" stroke-linecap="round"/>''',
+    "shieldbreaker_power": f'''
+  <path d="M128 30 L208 60 L208 130 C208 180 170 210 128 228 C86 210 48 180 48 130 L48 60 Z" fill="#7a8ca8" {S}/>
+  <path d="M128 30 L112 90 L140 120 L118 170 L132 228" fill="none" stroke="{INK}" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M190 20 L150 90" stroke="{INK}" stroke-width="18" stroke-linecap="round"/>
+  <path d="M190 20 L150 90" stroke="#c9c4be" stroke-width="8" stroke-linecap="round"/>''',
     # Trials: one glyph per Slay the Spire 1 boss. Also used as the boss badge on the map.
     "split_power": f'''
   <path d="M40 200 C30 140 80 100 104 104 C128 108 120 150 112 200 Z" fill="{SLIME}" {S}/>

@@ -10,7 +10,8 @@ Adds **Ascension 11 (Calamity)**:
 - **The Pact:** in co-op, a fallen player is still revived after the fight, but someone pays: the dead player grasps
   an ally, or an ally volunteers, and they take an Eternal **Unholy Pact** curse that hurts more with every revive.
 
-Design and balance live in [design/hardships.md](design/hardships.md). Built on
+Design and balance live in [design/hardships.md](design/hardships.md); rules for new content are in
+[CONVENTIONS.md](CONVENTIONS.md). Built on
 [BaseLib](https://github.com/Alchyr/BaseLib-StS2) from [Alchyr's mod template](https://github.com/Alchyr/ModTemplate-StS2/wiki),
 against STS2 **v0.107.1**.
 
@@ -58,8 +59,8 @@ Requires Docker only (the .NET 9 SDK and the art tools run in containers).
 
 ### Adding a hardship
 
-1. Subclass `HardshipRelic` in the right pool folder; set `Tier` and (for act pools) `Act`. Put combat effects in a
-   `HardshipPower` or vanilla power so they're visible. Crippling effects must be idempotent (every player has hooks).
+1. Subclass `EnemyPowerHardship<T>` / `PlayerPowerHardship<T>` (combat effects, logic in the power) or `HardshipRelic`
+   (out of combat) in the right pool folder; set `Tier` and (for act pools) `Act`. See [CONVENTIONS.md](CONVENTIONS.md).
 2. Add text to `Calamity/localization/eng/relics.json` (and `powers.json`); keys are prefixed `CALAMITY-`. The build
    fails if any text is missing.
 3. Add an SVG (or a drawing to `make_placeholders.py`) named after the class in snake_case.
