@@ -6,6 +6,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Cards;
@@ -372,15 +373,28 @@ public sealed class TimeWarpPower : TrialPower
     }
 }
 
-/// <summary>Trial of the Awakened One. Rebirth: the first time it would die, it revives at X% Max HP, cleansed.</summary>
+/// <summary>
+/// Trial of the Awakened One. Rebirth: the first time it would die, it rises at X% Max HP, cleansed, then spends its
+/// next turn Stunned and Intangible, so the killing turn's leftover damage barely touches it.
+/// </summary>
 public sealed class RebirthPower : TrialPower
 {
     private bool _used;
 
+    // True while the boss sits at 0 HP mid-rebirth. With no living enemy the game counts combat as ending, and while
+    // it's ending Heal and PowerCmd do nothing to monsters, so the revive would silently fail and the boss would die.
+    // Vanilla revivers (AdaptablePower, MockRevivePower) hold combat open the same way.
+    private bool _reviving;
+
     public override decimal InitialAmount(int tier) => ByAct(tier, 25, 35, 50);
+
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        [HoverTipFactory.FromPower<IntangiblePower>(), HoverTipFactory.Static(StaticHoverTip.Stun)];
 
     // Same pattern as vanilla's Lizard Tail.
     public override bool ShouldDieLate(Creature creature) => creature != Owner || _used;
+
+    public override bool ShouldStopCombatFromEnding() => _reviving;
 
     public override async Task AfterPreventingDeath(Creature creature)
     {
@@ -389,9 +403,38 @@ public sealed class RebirthPower : TrialPower
             return;
         }
         _used = true;
-        Flash();
-        await RemoveDebuffs();
-        await CreatureCmd.Heal(Owner, Math.Max(1m, Math.Floor(Owner.MaxHp * Amount / 100m)));
+        _reviving = true;
+        try
+        {
+            Flash();
+            await RemoveDebuffs();
+            await CreatureCmd.Heal(Owner, Math.Max(1m, Math.Floor(Owner.MaxHp * Amount / 100m)));
+            // Intangible 1 wears off at the end of the enemy turn, the same turn the stun is spent.
+            await PowerCmd.Apply<IntangiblePower>(new ThrowingPlayerChoiceContext(), Owner, 1m, Owner, null);
+            await Stun();
+        }
+        finally
+        {
+            _reviving = false;
+        }
         await PowerCmd.Remove(this);
+    }
+
+    // Skip the coming enemy turn, then carry on with the move it had queued.
+    private async Task Stun()
+    {
+        if (Owner.Monster is not { } monster || Owner.IsStunned)
+        {
+            return;
+        }
+        string? queued = monster.NextMove.Id;
+        if (queued != null && monster.MoveStateMachine.States.ContainsKey(queued))
+        {
+            await CreatureCmd.Stun(Owner, queued);
+        }
+        else if (monster.MoveStateMachine.StateLog.Count > 0)
+        {
+            await CreatureCmd.Stun(Owner);
+        }
     }
 }

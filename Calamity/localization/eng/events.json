@@ -37,7 +37,7 @@
   "CALAMITY-TRIAL_EVENT.pages.INITIAL.options.TIME_EATER.title": "Trial of the Time Eater",
   "CALAMITY-TRIAL_EVENT.pages.INITIAL.options.TIME_EATER.description": "Time Warp: the boss counts every card the party plays. On the last of each count, it gains Strength and ends that player's turn.",
   "CALAMITY-TRIAL_EVENT.trials.AWAKENED.title": "Trial of the Awakened One",
-  "CALAMITY-TRIAL_EVENT.trials.AWAKENED.description": "Rebirth: the first time the boss would die, it rises again, cleansed.",
+  "CALAMITY-TRIAL_EVENT.trials.AWAKENED.description": "Rebirth: the first time the boss would die, it rises again, cleansed, and spends its next turn Stunned and Intangible.",
   "CALAMITY-TRIAL_EVENT.pages.INITIAL.options.AWAKENED.title": "Trial of the Awakened One",
-  "CALAMITY-TRIAL_EVENT.pages.INITIAL.options.AWAKENED.description": "Rebirth: the first time the boss would die, it rises again, cleansed."
+  "CALAMITY-TRIAL_EVENT.pages.INITIAL.options.AWAKENED.description": "Rebirth: the first time the boss would die, it rises again, cleansed, and spends its next turn Stunned and Intangible."
 }
