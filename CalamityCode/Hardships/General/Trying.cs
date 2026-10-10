@@ -167,17 +167,18 @@ public sealed class LeakyFlask : HardshipRelic
 {
     public override HardshipTier Tier => HardshipTier.Trying;
 
-    public override Task AfterObtained()
+    public override async Task AfterObtained()
     {
-        Owner.SubtractFromMaxPotionCount(1);
-        return Task.CompletedTask;
+        // Vanilla's slot removal assumes a free slot to move the last potion into (it only runs at run start, on an empty
+        // belt); with a full belt it indexes slot -1 and throws. So with no free slot, discard the right-most potion first.
+        if (!Owner.HasOpenPotionSlots && Owner.PotionSlots.LastOrDefault(p => p != null) is { } rightmost)
+        {
+            await PotionCmd.Discard(rightmost);
+        }
+        await PlayerCmd.LoseMaxPotionCount(1, Owner);
     }
 
-    public override Task AfterRemoved()
-    {
-        Owner.AddToMaxPotionCount(1);
-        return Task.CompletedTask;
-    }
+    public override Task AfterRemoved() => PlayerCmd.GainMaxPotionCount(1, Owner);
 }
 
 /// <summary>You're Itchy: whenever you shuffle your draw pile, lose 1 HP.</summary>

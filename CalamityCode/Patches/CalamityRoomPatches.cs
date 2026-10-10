@@ -1,7 +1,10 @@
+using Calamity.CalamityCode.Hardships;
 using Calamity.CalamityCode.Map;
 using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Helpers;
+using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Multiplayer.Game;
 using MegaCrit.Sts2.Core.Nodes.Rooms;
 using MegaCrit.Sts2.Core.Nodes.Screens.TreasureRoomRelic;
@@ -145,5 +148,32 @@ internal static class CalamityNoSkipPatch
         }
         __result = Task.CompletedTask;
         return false;
+    }
+}
+
+/// <summary>
+/// Hardships use Event rarity (so they never enter vanilla relic pools), which means the treasure holder never lights its
+/// rarity glow. Light the same glows by tier instead: Crippling (party-wide) gets the uncommon blue, Crushing the rare gold.
+/// </summary>
+[HarmonyPatch(typeof(NTreasureRoomRelicHolder), nameof(NTreasureRoomRelicHolder.Initialize))]
+internal static class HardshipTierGlowPatch
+{
+    private static void Postfix(NTreasureRoomRelicHolder __instance, RelicModel relic)
+    {
+        GpuParticles2D? glow = (relic as HardshipRelic)?.Tier switch
+        {
+            HardshipTier.Crippling => __instance._uncommonGlow,
+            HardshipTier.Crushing => __instance._rareGlow,
+            _ => null,
+        };
+        if (glow == null)
+        {
+            return;
+        }
+        // Same fade-in vanilla uses for real uncommon/rare relics.
+        glow.Visible = true;
+        glow.Modulate = StsColors.transparentWhite;
+        glow.GlobalPosition = __instance.Relic.GlobalPosition + Vector2.One * 68f;
+        __instance.CreateTween().TweenProperty(glow, "modulate", Colors.White, 0.25);
     }
 }
