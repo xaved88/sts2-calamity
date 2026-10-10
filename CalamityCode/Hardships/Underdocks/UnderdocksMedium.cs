@@ -107,9 +107,18 @@ internal static class SoggyBandolierPatches
 
     private static void Postfix(PotionModel __instance, ref bool __result)
     {
-        if (__result && __instance.Owner?.Creature.GetPower<SoakedPower>() != null)
+        if (__result && __instance.Owner is { } owner && IsSoaked(owner))
         {
             __result = false;
         }
     }
+
+    // Soaked lands at the start of turn 1 (with the other hardship powers), but a potion can be clicked during the combat
+    // intro before that. So the relic also blocks the whole of turn 1: TurnNumber is 1 from combat setup until the
+    // player side's second turn begins.
+    private static bool IsSoaked(Player owner) =>
+        owner.Creature.GetPower<SoakedPower>() != null
+        || (owner.GetRelic<SoggyBandolier>() != null
+            && (CombatManager.Instance.IsInProgress || CombatManager.Instance.IsStarting)
+            && owner.PlayerCombatState?.TurnNumber <= 1);
 }
