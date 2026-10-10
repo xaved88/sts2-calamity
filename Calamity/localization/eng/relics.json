@@ -71,7 +71,7 @@
   "CALAMITY-BLIGHTED_SEEDS.description": "Card rewards offer [blue]{Cards}[/blue] fewer card.",
   "CALAMITY-BLIGHTED_SEEDS.flavor": "Nothing you plant will ever grow right.",
   "CALAMITY-DAMP_POWDER_HORN.title": "Damp Powder Horn",
-  "CALAMITY-DAMP_POWDER_HORN.description": "At the start of each combat, become [gold]Damp[/gold]: your first Attack deals [blue]{Damp}[/blue] less damage.",
+  "CALAMITY-DAMP_POWDER_HORN.description": "Start each combat with [blue]{Damp}[/blue] [gold]Damp[/gold]: your Attacks deal that much less damage, and it drops by 1 after each Attack you play.",
   "CALAMITY-DAMP_POWDER_HORN.flavor": "Fizzle.",
   "CALAMITY-BILGE_BUCKET.title": "Bilge Bucket",
   "CALAMITY-BILGE_BUCKET.description": "Enemies are [gold]Slimy[/gold]: their unblocked attacks add a [gold]Slimed[/gold] to the target's discard pile.",

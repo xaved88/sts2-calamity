@@ -16,8 +16,8 @@ namespace Calamity.CalamityCode.Hardships.Underdocks;
 
 // Act 1, Underdocks: water, rot, smugglers. Crushing ones hurt the rest of the run.
 
-/// <summary>Your first Attack each combat deals 3 less damage (the Damp power, removed after that attack).</summary>
-public sealed class DampPowderHorn : HardshipRelic
+/// <summary>You start each combat Damp 3: each Attack deals Damp less damage, then Damp dries out by 1.</summary>
+public sealed class DampPowderHorn : PlayerPowerHardship<DampPower>
 {
     public override HardshipTier Tier => HardshipTier.Trying;
 
@@ -25,15 +25,10 @@ public sealed class DampPowderHorn : HardshipRelic
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [new DynamicVar("Damp", 3m)];
 
-    protected override IEnumerable<IHoverTip> ExtraHoverTips => [HoverTipFactory.FromPower<DampPower>()];
-
-    protected override Task AtCombatStart(PlayerChoiceContext choiceContext, ICombatState combatState)
-    {
-        Flash();
-        return PowerCmd.Apply<DampPower>(choiceContext, Owner.Creature, DynamicVars["Damp"].BaseValue, Owner.Creature, null);
-    }
+    protected override decimal PowerAmount => DynamicVars["Damp"].BaseValue;
 }
 
+/// <summary>Amount = damage removed from each hit of your Attacks; drops by 1 after each Attack you play.</summary>
 public sealed class DampPower : HardshipPower
 {
     public override PowerType Type => PowerType.Debuff;
@@ -47,7 +42,7 @@ public sealed class DampPower : HardshipPower
     {
         if (cardPlay.Card.Owner.Creature == Owner && cardPlay.Card.Type == CardType.Attack)
         {
-            await PowerCmd.Remove(this);
+            await PowerCmd.Decrement(this);
         }
     }
 }
