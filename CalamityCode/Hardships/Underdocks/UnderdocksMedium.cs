@@ -8,6 +8,7 @@ using MegaCrit.Sts2.Core.Entities.Merchant;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Potions;
+using MegaCrit.Sts2.Core.Nodes.Potions;
 using MegaCrit.Sts2.Core.Random;
 using MegaCrit.Sts2.Core.Runs;
 
@@ -121,4 +122,27 @@ internal static class SoggyBandolierPatches
         || (owner.GetRelic<SoggyBandolier>() != null
             && (CombatManager.Instance.IsInProgress || CombatManager.Instance.IsStarting)
             && owner.PlayerCombatState?.TurnNumber <= 1);
+}
+
+/// <summary>
+/// Vanilla's potion popup only consults PassesCustomUsabilityCheck when it opens; its RefreshButtons (run on every combat
+/// state change and turn start) re-enables Use without it. During the combat intro that flickers Use back on, so re-apply
+/// the check after each refresh, and refuse the use itself as a backstop.
+/// </summary>
+[HarmonyPatch(typeof(NPotionPopup), nameof(NPotionPopup.RefreshButtons))]
+internal static class PotionPopupRespectsUsabilityPatch
+{
+    private static void Postfix(NPotionPopup __instance)
+    {
+        if (__instance.Potion is { } potion && !potion.PassesCustomUsabilityCheck)
+        {
+            __instance._useButton.Disable();
+        }
+    }
+}
+
+[HarmonyPatch(typeof(PotionModel), nameof(PotionModel.EnqueueManualUse))]
+internal static class PotionUseRespectsUsabilityPatch
+{
+    private static bool Prefix(PotionModel __instance) => __instance.PassesCustomUsabilityCheck;
 }
