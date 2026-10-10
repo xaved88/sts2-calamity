@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Placeholder map node: a cracked skull under a jagged comet. Dark ink like vanilla map icons
+       (the game tints it via SelfModulate, so keep it monochrome). -->
+  <g fill="#2a1f24" stroke="#2a1f24" stroke-linejoin="round">
+    <!-- comet tail -->
+    <path d="M18 14 L52 36 L40 38 L62 50 L48 52 L66 60" fill="none" stroke-width="7" stroke-linecap="round"/>
+    <!-- skull -->
+    <path d="M64 38 C34 38 22 58 24 78 C25 88 32 92 36 94 L36 108 L92 108 L92 94 C96 92 103 88 104 78 C106 58 94 38 64 38 Z"/>
+  </g>
+  <g fill="#f2e6d0">
+    <ellipse cx="48" cy="76" rx="10" ry="11"/>
+    <ellipse cx="80" cy="76" rx="10" ry="11"/>
+    <path d="M64 86 L58 98 L70 98 Z"/>
+    <rect x="46" y="102" width="6" height="7"/>
+    <rect x="61" y="102" width="6" height="7"/>
+    <rect x="76" y="102" width="6" height="7"/>
+  </g>
+  <path d="M70 40 L64 54 L74 60 L66 70" fill="none" stroke="#f2e6d0" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

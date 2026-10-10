@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- Placeholder power icon: a U-turn arrow; what's taken comes back. -->
+  <path d="M176 40 L176 150 C176 214 80 214 80 150 L80 120" fill="none" stroke="#1d1418" stroke-width="56" stroke-linecap="round"/>
+  <path d="M176 40 L176 150 C176 214 80 214 80 150 L80 120" fill="none" stroke="#e0242f" stroke-width="32" stroke-linecap="round"/>
+  <path d="M32 136 L80 56 L128 136 Z" fill="#e0242f" stroke="#1d1418" stroke-width="14" stroke-linejoin="round"/>
+</svg>

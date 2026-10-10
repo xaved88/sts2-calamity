@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- Placeholder: a femur snapped in the middle, halves knocked askew. -->
+  <defs>
+    <linearGradient id="bone" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f6eed8"/>
+      <stop offset="1" stop-color="#b9a283"/>
+    </linearGradient>
+    <!-- one half: two knobs + shaft ending in a jagged break -->
+    <g id="half">
+      <circle cx="0" cy="-17" r="19"/>
+      <circle cx="0" cy="17" r="19"/>
+      <path d="M8 -13 L84 -12 L76 -2 L88 6 L78 13 L8 13 Z"/>
+    </g>
+  </defs>
+  <g stroke="#1d1418" stroke-width="18" stroke-linejoin="round" fill="#1d1418">
+    <use href="#half" transform="translate(52 170) rotate(-38)"/>
+    <use href="#half" transform="translate(206 92) rotate(152)"/>
+  </g>
+  <g fill="url(#bone)">
+    <use href="#half" transform="translate(52 170) rotate(-38)"/>
+    <use href="#half" transform="translate(206 92) rotate(152)"/>
+  </g>
+  <!-- crack glow between the halves -->
+  <path d="M112 104 L126 120 L116 132 L134 146" fill="none" stroke="#c4162a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- chips -->
+  <path d="M146 162 l12 2 l-4 12 z M96 84 l10 -6 l3 12 z" fill="#d8c8a8" stroke="#1d1418" stroke-width="4" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,20 @@
+# From Alchyr's ModTemplate-StS2
+.godot/
+bin/
+/android/
+.git/
+.idea/
+.vs/
+publish/
+Properties/
+packages/
+.editorconfig
+*.user
+# Machine-specific (MegaDot path); see Directory.Build.props
+Directory.Build.props
+
+# Calamity
+obj/
+build/
+# Decompiled game and BaseLib code: for local reading only, never commit or redistribute.
+reference/

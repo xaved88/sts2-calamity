@@ -1,0 +1,17 @@
+{
+  "id": "Calamity",
+  "name": "Calamity",
+  "author": "Logan Bentley",
+  "description": "Ascension 11: a Trial vote for each act boss, two Calamity floors per act where everyone takes a hardship, and in co-op an Unholy Pact for every revive.",
+  "version": "v0.2.0",
+  "min_game_version": "0.107.1",
+  "has_pck": true,
+  "has_dll": true,
+  "dependencies": [
+    {
+      "id": "BaseLib",
+      "min_version": "3.4.7"
+    }
+  ],
+  "affects_gameplay": true
+}

@@ -1,0 +1,9 @@
+{
+  "ROOM_CALAMITY.title": "Calamity",
+  "ROOM_CALAMITY.description": "Every path passes through here. Each player must take a [red]hardship[/red] to carry for the rest of the run.",
+  "CALAMITY_PACT.dead": "[red]You have fallen.[/red] Something offers you a way back.\n[gold]Grasp an ally[/gold] to return. They will bear the [red]Unholy Pact[/red].",
+  "CALAMITY_PACT.ally": "[gold]{Name}[/gold] has fallen and is reaching for someone to pull them back.\nWhoever they grasp bears the [red]Unholy Pact[/red].",
+  "CALAMITY_PACT.offer": "Offer your soul",
+  "ROOM_TRIAL.title": "Trial",
+  "ROOM_TRIAL.description": "Every path passes through here. The party votes on a [gold]Trial[/gold] for this act's boss."
+}

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- Placeholder power icon: a snapped bone. Bold and simple; it's shown at 64px. -->
+  <defs>
+    <g id="half">
+      <circle cx="0" cy="-22" r="25"/>
+      <circle cx="0" cy="22" r="25"/>
+      <path d="M10 -17 L100 -16 L90 -2 L104 8 L92 17 L10 17 Z"/>
+    </g>
+  </defs>
+  <g transform="translate(128 128) scale(0.82) translate(-128 -128)">
+  <g stroke="#1d1418" stroke-width="26" stroke-linejoin="round" fill="#1d1418">
+    <use href="#half" transform="translate(44 182) rotate(-40)"/>
+    <use href="#half" transform="translate(214 78) rotate(140)"/>
+  </g>
+  <g fill="#efe3c8">
+    <use href="#half" transform="translate(44 182) rotate(-40)"/>
+    <use href="#half" transform="translate(214 78) rotate(140)"/>
+  </g>
+  <path d="M112 92 L132 116 L116 132 L140 154" fill="none" stroke="#e0242f" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

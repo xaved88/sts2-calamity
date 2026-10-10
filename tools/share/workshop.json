@@ -1,0 +1,9 @@
+{
+  "title": "Calamity (beta)",
+  "description": "Adds Ascension 11: Trials for each act boss, Calamity floors where every player takes a hardship, and an Unholy Pact for every co-op revive. Requires BaseLib.",
+  "visibility": "friends_only",
+  "changeNote": "First playtest build.",
+  "tags": [],
+  "dependencies": [],
+  "contentDescriptors": []
+}
